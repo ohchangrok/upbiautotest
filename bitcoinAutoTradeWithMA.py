@@ -6,9 +6,13 @@ access = "Xoh8dtxxCuxP8xlEB0Uqtw5BiuvPkvHadYVvfRkn"
 secret = "aQNEOL0Lq3znbn545Mx4AWSPyxPOJutKgMIFzMSk"
 
 # 가중치
-value = 0.7 
+value = 0.5 
 # 비트티커
 ticker_tag = "KRW-ETC"
+# 해당값을 곱했을시에 5000원이 넘는 숫자
+won = 0.09
+#최소금액
+min_won = 2500000
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
@@ -42,6 +46,9 @@ def get_balance(ticker):
 def get_current_price(ticker):
     """현재가 조회"""
     return pyupbit.get_orderbook(tickers=ticker)[0]["orderbook_units"][0]["ask_price"]
+def get_currnt_pricecount(ticker):
+    """현제 보유갯수"""
+    return pyupbit.get_orderbook(tickers=ticker)[0]["orderbook_units"][0]["ask_size"]
 
 # 로그인
 upbit = pyupbit.Upbit(access, secret)
@@ -60,19 +67,21 @@ while True:
             target_price = get_target_price(ticker_tag, value)
             ma15 = get_ma15(ticker_tag)
             current_price = get_current_price(ticker_tag)
+            #etc_count = get_balance("ETC")
             # EM선
             if target_price < current_price and ma15 < current_price:
                 krw = get_balance("KRW")
                 #구입
-                if krw > 5000:
-                    upbit.buy_market_order(ticker_tag, krw-5000)
-                    toDay_Price = krw
-            elif current_price < (toDay_Price - (toDay_Price * 0.005)):
-                upbit.sell_market_order(ticker_tag, krw-5000)
+                if krw > min_won:
+                    upbit.buy_market_order(ticker_tag, krw - min_won) 
+                    #toDay_Price = krw - min_won
+            #elif current_price < etc_count * won:
+            #    upbit.sell_market_order(ticker_tag, etc_count)
+            #    toDay_Price = 0
         else:
-            krw = get_balance("KRW")
-            if krw > 5000:
-                upbit.sell_market_order(ticker_tag, krw-5000)
+            etc_count = get_balance("ETC")
+            if etc_count > 0:
+                upbit.sell_market_order(ticker_tag, etc_count)
         time.sleep(1)
     except Exception as e:
         print(e)
