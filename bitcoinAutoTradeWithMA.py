@@ -6,7 +6,7 @@ access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
 secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
 
 # 가중치
-value = 0.4
+value = 0.1
 # 비트티커
 ticker_tag = "KRW-ETC"
 # 해당값을 곱했을시에 5000원이 넘는 숫자
@@ -27,7 +27,7 @@ def get_start_time(ticker):
     return start_time
 
 def get_ma15(ticker):
-    """7일 이동 평균선 조회"""
+    """2일 이동 평균선 조회"""
     df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
     ma15 = df['close'].rolling(2).mean().iloc[-1]
     return ma15

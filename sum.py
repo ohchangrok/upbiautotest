@@ -29,8 +29,8 @@ def get_start_time(ticker):
 
 def get_ma15(ticker):
     """7일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
-    ma15 = df['close'].rolling(2).mean().iloc[-1]
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=3)
+    ma15 = df['close'].rolling(3).mean().iloc[-1]
     return ma15
 
 def get_balance(ticker):
