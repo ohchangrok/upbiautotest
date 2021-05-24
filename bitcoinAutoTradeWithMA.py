@@ -28,8 +28,8 @@ def get_start_time(ticker):
 
 def get_ma15(ticker):
     """7일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=7)
-    ma15 = df['close'].rolling(15).mean().iloc[-1]
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
+    ma15 = df['close'].rolling(2).mean().iloc[-1]
     return ma15
 
 def get_balance(ticker):
@@ -69,7 +69,8 @@ while True:
             current_price = get_current_price(ticker_tag)
             #etc_count = get_balance("ETC")
             # EM선
-            if target_price < current_price and ma15 < current_price:
+            #if target_price < current_price and ma15 < current_price:
+            if target_price < current_price:
                 krw = get_balance("KRW")
                 #구입
                 if krw > min_won:

@@ -5,7 +5,7 @@ access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
 secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
 
 
-def get_ror(k=0.5):
+def get_ror(k=0.1):
     df = pyupbit.get_ohlcv("KRW-ETC")
     df['range'] = (df['high'] - df['low']) * k
     df['target'] = df['open'] + df['range'].shift(1)
