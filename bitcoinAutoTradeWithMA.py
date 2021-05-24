@@ -6,7 +6,7 @@ access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
 secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
 
 # 가중치
-value = 0.1
+value = 0.4
 # 비트티커
 ticker_tag = "KRW-ETC"
 # 해당값을 곱했을시에 5000원이 넘는 숫자
