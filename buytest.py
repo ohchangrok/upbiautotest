@@ -1,6 +1,6 @@
 import pyupbit
-access = "Xoh8dtxxCuxP8xlEB0Uqtw5BiuvPkvHadYVvfRkn"
-secret = "aQNEOL0Lq3znbn545Mx4AWSPyxPOJutKgMIFzMSk"
+access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
+secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
 upbit = pyupbit.Upbit(access, secret)
 upbit.buy_market_order("KRW-ETC", 5000) 
 #print(krw['NoneType'])

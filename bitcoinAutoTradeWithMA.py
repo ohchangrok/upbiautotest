@@ -2,21 +2,21 @@ import time
 import pyupbit
 import datetime
 
-access = "Xoh8dtxxCuxP8xlEB0Uqtw5BiuvPkvHadYVvfRkn"
-secret = "aQNEOL0Lq3znbn545Mx4AWSPyxPOJutKgMIFzMSk"
+access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
+secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
 
 # 가중치
-value = 0.5 
+value = 0.1
 # 비트티커
 ticker_tag = "KRW-ETC"
 # 해당값을 곱했을시에 5000원이 넘는 숫자
 won = 0.09
 #최소금액
-min_won = 2500000
+min_won = 5000
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=3)
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
     target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
 
@@ -27,8 +27,8 @@ def get_start_time(ticker):
     return start_time
 
 def get_ma15(ticker):
-    """15일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=15)
+    """7일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=7)
     ma15 = df['close'].rolling(15).mean().iloc[-1]
     return ma15
 
