@@ -79,6 +79,7 @@ class Stock:
             return
         #비트의 갯수
         bit_count = get_balance(self.ticker_tag)
+        print("매" + bit_count)
         if bit_count > 0:
             upbit.sell_market_order(self.ticker, bit_count)
         self.buyPrice = 0
@@ -87,6 +88,7 @@ class Stock:
         if self.today_maxprice > 0 and self.ticker != "":
             upbit.buy_market_order(self.ticker, self.today_maxprice) 
             self.buyPrice = self.today_maxprice
+            print("구입" + self.buyPrice)
 
     #도달가 해당값이 넘어갈때 산다.
     def Get_target_price(self):
@@ -117,16 +119,16 @@ class Stock:
         targetprice = self.Get_target_price()
         if targetprice < nowprice:
             if self.isMa and mavalue < nowprice:
-                #self.Buy()
-                print("삿다")
+                self.Buy()
+                
             else:
-                #self.Buy()
-                print("삿다")
+                self.Buy()
+                
         elif self.buyPrice != 0 and self.sellpercent != 0:
             min = self.buyPrice - (self.buyPrice * self.sellpercent)
             if nowprice < min:
-                #self.Sell()
-                print("팔았다")
+                self.Sell()
+                
 
     def Close(self):
         self.isInit = False
@@ -152,6 +154,7 @@ def get_start_time(ticker):
 
 # Start
 upbit = pyupbit.Upbit(access, secret)
+print("autotrade start")
 
 index = 0
 stocklist = list()
@@ -160,8 +163,7 @@ for i in tickerName:
     s.init(tickerName[index], buyper[index], sellper[index], value_k[index], Ma[index])
     stocklist.insert(0, s)
 
-print(len(stocklist))
-    
+ 
 while True:
     try:
         now = datetime.datetime.now()
