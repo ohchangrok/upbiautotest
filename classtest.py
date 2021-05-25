@@ -13,9 +13,9 @@ target_dayValue = 2
 target_MaValue = 15
 
 tickerName = ['ETC'] #티커이름
-buyper  = [100] #구입비중 안에 있는것을 다 합쳐서 100이 다
-sellper = [7] #판매비중 삿을떄 비중에해서 해당퍼센트 이하로 떨어지면은 파는 드 만약 저번처럼 훅떨어지는것을 계산해서 들어가는 수치를 잡음
-value_k = [10] #가중치
+buyper  = [100] #구입비중 안에 있는것을 다 합쳐서 100이다
+sellper = [4] #판매비중 삿을떄 비중에해서 해당퍼센트 이하로 떨어지면은 파는 드 만약 저번처럼 훅떨어지는것을 계산해서 들어가는 수치를 잡음(%)
+value_k = [10] #가중치(%)
 Ma      = [True] #ma
 
 access = "GKzRKyi1gfcC2mtXyHxY345JxgHHQR27yZ5xBMq3"          # 본인 값으로 변경
@@ -27,11 +27,11 @@ class Stock:
     today_maxprice = 0
     value_k = 0
     isMa = False
-    buyPrice = 0
     sellpercent = 0
     isInit = False
     buypercent = 0
     sellpercent = 0
+    lastprice = 0
     #_ticker : ETC등
     #_buypercent : 100퍼센트등 다른 Stock을 합쳐서 넘지 않도록하자.
     #_value_k 구입시 고려할 배중치
@@ -52,15 +52,17 @@ class Stock:
 
     def Reset(self):
         krw = get_balance("KRW")
-        self.today_maxprice = krw / (self.buypercent * 0.01)
+        self.today_maxprice = int(krw / (self.buypercent * 0.01))
+        
         #5천원이상은 않사질경우가있다 업비트 최소금액
         if self.today_maxprice < upbit_minprice:
             self.today_maxprice = 0
+        else:
+            self.today_maxprice = self.today_maxprice - upbit_minprice
+
         self.sellpercent = (self.sellpercent * 0.01)
         #구입후 판매가 이퍼센트 이하로 떨어지면은 판매를 이룰 수치
         self.isInit = True
-        self.buyPrice = 0
-
 
     def Get_ticker(self):
         return self.ticker
@@ -74,21 +76,17 @@ class Stock:
 
     #현제가진 종목을 판다
     def Sell(self):
-
-        if self.isInit == False:
-            return
         #비트의 갯수
         bit_count = get_balance(self.ticker_tag)
         print("매" + bit_count)
         if bit_count > 0:
             upbit.sell_market_order(self.ticker, bit_count)
-        self.buyPrice = 0
 
     def Buy(self):
-        if self.today_maxprice > 0 and self.ticker != "":
-            upbit.buy_market_order(self.ticker, self.today_maxprice) 
-            self.buyPrice = self.today_maxprice
-            print("구입" + self.buyPrice)
+        krw = get_balance("KRW")
+        if upbit_minprice < krw:
+            if self.today_maxprice > 0 and self.ticker != "":
+                upbit.buy_market_order(self.ticker, self.today_maxprice) 
 
     #도달가 해당값이 넘어갈때 산다.
     def Get_target_price(self):
@@ -98,11 +96,11 @@ class Stock:
         return target_price
 
     def GetAvaragePrice(self):
-        lastprice = upbit.get_amount(self.ticker)
-        if lastprice == 0: 
-            return 0
-        bit_count = get_balance(self.ticker_tag)
-        return lastprice / bit_count
+
+        amount = upbit.get_amount(self.ticker)
+        if amount is not None:
+            return amount - (amount * self.sellpercent)
+        return 0
 
     #이동평균선
     def Get_MA(self):
@@ -125,23 +123,24 @@ class Stock:
         mavalue = self.Get_MA()
         targetprice = self.Get_target_price()
         avagprice = self.GetAvaragePrice()
-        
-        if targetprice < nowprice:
-            if self.isMa and mavalue < nowprice:
-                self.Buy()
-                print("Buy")
-            else:
-                self.Buy()
-                print("Buy")
+        try:
+            if targetprice < nowprice:
+                if self.isMa and mavalue < nowprice:
+                    self.Buy()
+                else:
+                    self.Buy()
 
-        elif avagprice != 0 and self.sellpercent != 0:
-            min = avagprice - (avagprice * self.sellpercent)
-            if nowprice < min:
-                self.Sell()
-                print("sell")
+            elif avagprice != 0 and self.sellpercent != 0:
+                if nowprice < avagprice:
+                    self.Sell()
+                    
+        except Exception as e:
+            print(e)
+                #print("sell")
                 
     def Close(self):
         self.isInit = False
+
 
 #Func
 def get_balance(ticker):
