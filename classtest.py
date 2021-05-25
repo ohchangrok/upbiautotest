@@ -10,11 +10,11 @@ upbit_minprice = 5000
 #타겟금액을 구할시에 계산할 이전날짜의 갯수
 target_dayValue = 2
 #Ma수치를 구할때 계산될 이전날짜의 갯수
-target_MaValue = 3
+target_MaValue = 15
 
 tickerName = ['ETC'] #티커이름
 buyper  = [100] #구입비중 안에 있는것을 다 합쳐서 100이 다
-sellper = [3] #판매비중 삿을떄 비중에해서 해당퍼센트 이하로 떨어지면은 파는 드
+sellper = [7] #판매비중 삿을떄 비중에해서 해당퍼센트 이하로 떨어지면은 파는 드 만약 저번처럼 훅떨어지는것을 계산해서 들어가는 수치를 잡음
 value_k = [10] #가중치
 Ma      = [True] #ma
 
@@ -97,6 +97,13 @@ class Stock:
         target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * self.value_k
         return target_price
 
+    def GetAvaragePrice(self):
+        lastprice = upbit.get_amount(self.ticker)
+        if lastprice == 0: 
+            return 0
+        bit_count = get_balance(self.ticker_tag)
+        return lastprice / bit_count
+
     #이동평균선
     def Get_MA(self):
         """2일 이동 평균선 조회"""
@@ -117,19 +124,22 @@ class Stock:
         nowprice = self.Get_Nowprice()
         mavalue = self.Get_MA()
         targetprice = self.Get_target_price()
+        avagprice = self.GetAvaragePrice()
+        
         if targetprice < nowprice:
             if self.isMa and mavalue < nowprice:
                 self.Buy()
-                
+                print("Buy")
             else:
                 self.Buy()
-                
-        elif self.buyPrice != 0 and self.sellpercent != 0:
-            min = self.buyPrice - (self.buyPrice * self.sellpercent)
+                print("Buy")
+
+        elif avagprice != 0 and self.sellpercent != 0:
+            min = avagprice - (avagprice * self.sellpercent)
             if nowprice < min:
                 self.Sell()
+                print("sell")
                 
-
     def Close(self):
         self.isInit = False
 
