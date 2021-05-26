@@ -1,5 +1,5 @@
 ticker,ETC
-buy_percent,50
+buy_percent,100
 sell_percent,4
 value_k,4
 ma_day,14

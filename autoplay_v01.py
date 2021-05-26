@@ -47,10 +47,16 @@ class TimeMananger:
 
     def Update_DayTime(self, _now):
         print("update Update_DayTime")
-        self.start_time = _now - datetime.timedelta(hours = _now.hour, minutes=_now.minute, seconds=_now.second, microseconds=_now.microsecond)
+        if _now.hour < 9:
+            self.start_time = _now - datetime.timedelta(days= 1, hours = _now.hour, minutes=_now.minute, seconds=_now.second, microseconds=_now.microsecond)
+        else: 
+            self.start_time = _now - datetime.timedelta(hours = _now.hour, minutes=_now.minute, seconds=_now.second, microseconds=_now.microsecond)
         self.start_time = self.start_time + datetime.timedelta(hours=9)
         self.end_time = self.start_time + datetime.timedelta(days=1)
         self.end_time = self.end_time - datetime.timedelta(seconds=10)
+        print(self.start_time)
+        print(self.end_time)
+        print(_now)
         
     def Update_Hourstime(self, _now):
         print("update Update_Hourstime")
@@ -101,9 +107,9 @@ class Stock:
             return self.get_balance("KRW")
 
     # 얼마이하로 떨어졌을시에 팔것인지
-    def Get_sellpercent(self):
+    def Get_sellpercent(self, ticker):
         if self.buypercent != 0:
-            amount = upbit.get_amount(self.ticker)
+            amount = upbit.get_avg_buy_price(ticker)
             per = (self.buypercent * 0.01)
             return amount * per
         else:
@@ -123,6 +129,37 @@ class Stock:
                 else:
                     return 0
         return 0
+
+    def get_avg_buy_price(self, ticker='KRW', contain_req=False):
+        """
+        특정 코인/원화의 매수평균가 조회
+        :param ticker: 화폐를 의미하는 영문 대문자 코드
+        :param contain_req: Remaining-Req 포함여부
+        :return: 매수평균가
+        [contain_req == True 일 경우 Remaining-Req가 포함]
+        """
+        try:
+            # KRW-BTC
+            if '-' in ticker:
+                ticker = ticker.split('-')[1]
+
+            balances, req = self.get_balances(contain_req=True)
+
+            avg_buy_price = 0
+            for x in balances:
+                if x['currency'] == ticker:
+                    avg_buy_price = float(x['avg_buy_price'])
+                    break
+            if contain_req:
+                return avg_buy_price, req
+            else:
+                return avg_buy_price
+
+        except Exception as x:
+            
+            return None
+
+
 
     def get_amount(self, ticker, contain_req=False):
         """
@@ -158,7 +195,7 @@ class Stock:
             else:
                 return amount
         except Exception as x:
-            print(x.__class__.__name__)
+            #print(x.__class__.__name__)
             return None
 
     #현제가격 ex :10,000
@@ -204,7 +241,7 @@ class Stock:
         nowprice = self.Get_Nowprice()        # 현제금
         mavalue = self.Get_EMA()              # ema 수치
         targetprice = self.Get_target_price() # 목표가
-        avagprice = self.get_avg_buy_price(self.ticker) # 장중에 매도할 금액
+        avagprice = self.Get_sellpercent(self.ticker) # 장중에 매도할 금액
         try:
             if targetprice < nowprice:
                 if self.isMa:
