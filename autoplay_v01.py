@@ -47,11 +47,16 @@ class TimeMananger:
 
     def Update_DayTime(self, _now):
         print("update Update_DayTime")
-        if _now.hour < 9:
+        h = 9
+        m = 0
+
+        if _now.hour <= h: # and _now.minute < m:
             self.start_time = _now - datetime.timedelta(days= 1, hours = _now.hour, minutes=_now.minute, seconds=_now.second, microseconds=_now.microsecond)
         else: 
             self.start_time = _now - datetime.timedelta(hours = _now.hour, minutes=_now.minute, seconds=_now.second, microseconds=_now.microsecond)
-        self.start_time = self.start_time + datetime.timedelta(hours=9)
+
+        print(self.start_time)
+        self.start_time = self.start_time + datetime.timedelta(hours=h, minutes = m)
         self.end_time = self.start_time + datetime.timedelta(days=1)
         self.end_time = self.end_time - datetime.timedelta(seconds=10)
         print(self.start_time)
@@ -72,7 +77,7 @@ class Stock:
     ticker_tag = "" #KRW-ETC
     value_k = 0 #구입시 가중치
     isMa = False #ma를 할것인지 여부
-    buypercent = 0 #_buypercent : 100퍼센트등 다른 Stock을 합쳐서 넘지 않도록하자.
+    buypercent = 0 #해당 구입리미트 0이면 다사진다 만약 다른코인이 0이라면은 그코인만 다사짐 자신의 잔고를 가지고 판단하자
     sellpercent = 0 #구입가에서 몇퍼떨어졌을시에 팔것인지
     target_day = 0  #구입시 계산에 몇일을 포함할것인지
     ma_day = 0 #ma시에 몇일치를 통계낼것인지
@@ -89,6 +94,16 @@ class Stock:
         self.target_day = _targetday
         self.ma_day = _ma_day
 
+    def Get_Ohlcy_Ema7(self):
+        df7 = pyupbit.get_ohlcv(self.ticker, interval="minute1", count= 7)
+        ema7 = df7['close'].ewm(7).mean().iloc[-1]
+        return ema7
+    
+    def Get_Ohlcy_Ema15(self):
+        df15 = pyupbit.get_ohlcv(self.ticker, interval="minute1", count= 15)
+        ema15 = df15['close'].ewm(15).mean().iloc[-1]
+        return ema15
+
     def get_avg_buy_price(self, ticker='KRW', contain_req=False):
         avg = self.get_amount(ticker)
         if avg is None:
@@ -96,15 +111,6 @@ class Stock:
         else:
             min = avg * (self.sellpercent * 0.01)
             return avg - min
-
-    # 살경우에 내현제 잔고에서 몇퍼센트로 소모할것인지
-    def Get_buypercent(self):
-        if self.buypercent != 0:
-            krw = self.get_balance("KRW")
-            per = (self.buypercent * 0.01)
-            return krw * per
-        else:
-            return self.get_balance("KRW")
 
     # 얼마이하로 떨어졌을시에 팔것인지
     def Get_sellpercent(self, ticker):
@@ -161,7 +167,7 @@ class Stock:
 
 
 
-    def get_amount(self, ticker, contain_req=False):
+    def Get_Amount(self, ticker, contain_req=False):
         """
         특정 코인/원화의 매수금액 조회
         :param ticker: 화폐를 의미하는 영문 대문자 코드 (ALL 입력시 총 매수금액 조회)
@@ -196,7 +202,7 @@ class Stock:
                 return amount
         except Exception as x:
             #print(x.__class__.__name__)
-            return None
+            return 0
 
     #현제가격 ex :10,000
     def Nowprice(self):
@@ -207,15 +213,29 @@ class Stock:
 
     # 판매
     def Sell(self):
-        bit_count = self.get_balance(self.ticker_tag)#비트의 갯수
+        bit_count = self.get_balance(self.ticker)#비트의 갯수
         if bit_count > 0:
             upbit.sell_market_order(self.ticker, bit_count)
 
     # 구입
     def Buy(self):
-        krw = self.get_balance("KRW")
-        if upbit_minprice < krw:
-                upbit.buy_market_order(self.ticker, self.Get_buypercent() - upbit_minprice)
+        amount =  self.Get_Amount(self.ticker) # 현재 매수한 금액
+        krw = self.get_balance("KRW") - upbit_minprice# 현제 잔고 
+        if krw <= 0:
+            return
+
+        if amount > 0 :
+            
+            if self.buypercent <= amount: 
+                return
+            elif (self.buypercent - amount) < upbit_minprice:
+                return
+            
+            v = self.buypercent - amount
+            if (krw - v) > 0:
+                upbit.buy_market_order(self.ticker, v)
+        elif (krw -self.buypercent) > 0:
+            upbit.buy_market_order(self.ticker, (krw -self.buypercent))
 
     # 가중치 구분
     def Get_target_price(self):
@@ -236,12 +256,22 @@ class Stock:
         current_price = pyupbit.get_orderbook(tickers=self.ticker)[0]["orderbook_units"][0]["ask_price"]
         return current_price
 
+    def Is_EMA_Minute(self):
+        ema7 = self.Get_Ohlcy_Ema7()
+        ema15 = self.Get_Ohlcy_Ema15()
+        print(ema7)
+        print(ema15)
+
+
+    
+
     # 업데이트
     def Update(self):
         nowprice = self.Get_Nowprice()        # 현제금
         mavalue = self.Get_EMA()              # ema 수치
         targetprice = self.Get_target_price() # 목표가
         avagprice = self.Get_sellpercent(self.ticker) # 장중에 매도할 금액
+        #self.Is_EMA_Minute()
         try:
             if targetprice < nowprice:
                 if self.isMa:
