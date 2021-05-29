@@ -1,7 +1,7 @@
 ticker,ETC,BTC,LTC
-buy_price,100000,100000,100000
+buy_price,500000,500000,500000
 sell_percent,2,2,2
 value_k,5,3,2
 target_day,2,2,2
-ma_Type,minute1,day,minute30
+ma_Type,minute10,day,minute30
 bench_Mark,SS,None,EMA
