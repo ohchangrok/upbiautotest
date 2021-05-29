@@ -1,4 +1,4 @@
-import pyupbit
+ import pyupbit
 import numpy as np
 
 df = pyupbit.get_ohlcv("KRW-ETC")

@@ -2,8 +2,8 @@ import time
 import pyupbit
 import datetime
 
-access = "z09K0F8ExBX2GOEKjinRFZ8ytSucvQK22FB5TyFY"
-secret = "96ommUjoqjwFjTXVKgLxHXEXfqGhacOdUjZVBYIp"
+access = ""
+secret = ""
 
 # 가중치
 value = 0.1

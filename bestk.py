@@ -13,7 +13,7 @@ def Get_MA(counts):
     return ma15
 
 def get_ror(k=0.02):
-    df = pyupbit.get_ohlcv("KRW-ETC", count=2)
+    df = pyupbit.get_ohlcv("KRW-LTC", count=2)
     df['range'] = (df['high'] - df['low']) * k
     df['target'] = df['open'] + df['range'].shift(1)
 
@@ -24,13 +24,11 @@ def get_ror(k=0.02):
 
     ror = df['ror'].cumprod()[-2]
     return ror
-
-
-
+    
 for k in np.arange(0.1, 1.0, 0.1):
     ror = get_ror(k)
     print("%.1f %f" % (k, ror))
     
-print( Get_MA(14))
+#print( Get_MA(14))
     # 이동평균선
 

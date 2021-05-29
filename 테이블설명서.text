@@ -1,0 +1,33 @@
+0. 파일처음에  access / secret 키는 자신의 것으로 입력하기바람
+1. ticker는 종목(이클은 ETC)
+2. buy_price은 구입금액
+3. sell_percent는 현제 구입된 금액에서 몇퍼센트떨어졌을시에 판매할것인지를 선택한다.
+4. value_k는 전날의 종가 + ((최고가 - 최저가) * value_k) 한마디로 보정치
+5. target_days는 value_k산출시 이용하는 전날수치의 갯수
+6. ma_Type
+   긁어오는 시간정보의 값 target하고는 틀리다.
+   minute1 1분
+   minute3 3분
+   minute5 5분
+   minute10 10분
+   minute30 30분
+   minute60 60분
+   minute240 240분
+   day 1일
+   week 주봉
+   month 월봉
+
+7.bench_Mark
+   타입
+   EMA: 
+      EMA수치를 가지고 계산을 한다 7 / 15의 값을 입력했으며 긁어오는 시간값은 ma_Type을 기준으로 사용한다.
+      7봉이 15봉 위에 있으면은 구입을 아래있으면은 판매를 한다. 구입시에는 크로스가 그려야만 구입을 시도한다(3봉이전)
+   
+   SS:StochasticSlow
+      StochasticSlow 수치를 가지고 계산을 한다 7 / 15의 값을 입력했으며 긁어오는 시간값은 ma_Type을 기준으로 사용한다.
+      7봉이 15봉 위에 있으면은 구입을 아래있으면은 판매를 한다. 구입시에는 크로스가 그려야만 구입을 시도한다(3봉이전)   
+   
+   None:
+      value_k를 기준점으로 구입을 한다.
+      판매는 sell_percent기준
+

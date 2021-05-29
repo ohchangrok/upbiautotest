@@ -1,6 +1,7 @@
-ticker,ETC
-buy_price,0
-sell_percent,4
-value_k,4
-target_day,2
-ma_Type,EMA_K
+ticker,ETC,BTC,LTC
+buy_price,100000,100000,100000
+sell_percent,2,2,2
+value_k,5,3,2
+target_day,2,2,2
+ma_Type,minute1,day,minute30
+bench_Mark,SS,None,EMA

@@ -18,8 +18,8 @@ sellper = [4] #판매비중 삿을떄 비중에해서 해당퍼센트 이하로 
 value_k = [10] #가중치(%)
 Ma      = [True] #ma
 
-access = "GKzRKyi1gfcC2mtXyHxY345JxgHHQR27yZ5xBMq3"          # 본인 값으로 변경
-secret = "GuRqKjGBshZObqPvrX0G27hG9pXUV2vh3UBgNztk"          # 본인 값으로 변경
+access = ""          # 본인 값으로 변경
+secret = ""          # 본인 값으로 변경
 
 class Stock:
     ticker = ""

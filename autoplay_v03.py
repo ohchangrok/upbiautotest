@@ -12,8 +12,8 @@ from numpy import fabs
 upbit_minprice = 5000
 #타겟금액을 구할시에 계산할 이전날짜의 갯수
 
-access = ""          # 본인 값으로 변경
-secret = ""          # 본인 값으로 변경
+access = "GKzRKyi1gfcC2mtXyHxY345JxgHHQR27yZ5xBMq3"          # 본인 값으로 변경
+secret = "GuRqKjGBshZObqPvrX0G27hG9pXUV2vh3UBgNztk"          # 본인 값으로 변경
 
 # Class
 class TableManager:
