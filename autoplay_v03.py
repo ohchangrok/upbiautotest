@@ -114,7 +114,7 @@ class Stock:
         else :
             print("Error:타입을 설정")
             print("========================")
-    # 캔들 업데이트
+    # 캔들 업데이트 
     def Update_Candle(self): 
         self.refDF = pyupbit.get_ohlcv(self.ticker, interval=self.matype, count=21)
         # 캔들 갯수가 있으니 한번씩만 받아서 저장해서 사용하자
@@ -130,24 +130,25 @@ class Stock:
 
         try:
             if avagprice > 0: #판매
-                if nowprice < avagprice :
-                    if self.benchtype == "SS":    
-                        if v < 0:
-                            self.Sell()
-                    elif self.benchtype == "EMA":
-                        if ma < 0:
-                           self.Sell()
-                    elif self.benchtype == "None":
+                
+                if self.benchtype == "SS":    
+                    if v < 0:
+                        self.Sell()
+                elif self.benchtype == "EMA":
+                    if ma < 0:
+                        self.Sell()
+                elif self.benchtype == "None":
+                    if nowprice < avagprice :
                         self.Sell()
 
             if self.benchtype == "None": #구입
                 if targetprice < nowprice: #value_k
                     self.Buy()
             elif self.benchtype == "EMA": #ema
-                if ma > 2:
+                if ma > 0:
                     self.Buy()
             elif self.benchtype == "SS": 
-                if v > 2:
+                if v > 1:
                     self.Buy()
 
         except Exception as e:
@@ -165,24 +166,17 @@ class Stock:
         amount =  self.Get_Amount(self.ticker) # 현재 매수한 금액
         krw = self.get_balance("KRW") - upbit_minprice# 현제 잔고 - 업비트 최소잔고
         buycount = self.buyprice
+        buy = buycount - amount
         if krw <= 0:
             return
-        if amount > 0: 
-            if buycount <= amount: 
-                return
-            elif (buycount - amount) < upbit_minprice:
-                return
-            v = buycount - amount
-            if (krw - v) > 0:
-                upbit.buy_market_order(self.ticker, v)
+        
+        if buy > 0:
+            if buy > krw:
+                upbit.buy_market_order(self.ticker, krw)
                 print("buy")
-        elif buycount > 0:
-            if (krw - buycount) > 0:
-                upbit.buy_market_order(self.ticker, buycount)
+            else:
+                upbit.buy_market_order(self.ticker, buy)
                 print("buy")
-        elif krw > 0:           
-            upbit.buy_market_order(self.ticker, krw)
-            print("buy")
         else :
             print("Buy error")
 
@@ -221,50 +215,80 @@ class Stock:
         if self.benchtype =="EMA":
             return 0
 
-        max = 65
-        min = 35
-        k    = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', -1) *100
-        k_m1 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', -2) *100
-        k_m2 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', -3) *100
-        d    = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', -1) *100
-        d_m1 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', -1) *100
-        d_m2 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', -2) *100
+        max = 70
+        min = 30
+
+        values = 0
+        now = -1
+        prev1 = -2
+        prev2 = -3
+        
+        k    = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', now + values) *100
+        k_m1 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', prev1 + values) *100
+        k_m2 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', prev2 + values) *100
+        d    = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', now + values) *100
+        d_m1 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', prev1 + values) *100
+        d_m2 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowD', prev2 + values) *100
 
         #매도
         results = 0
         iscross = self.IsCross(k, k_m1, k_m2, d, d_m1, d_m2)
-        if k > max:
-            if k > d:
-                if iscross:
-                    results = 2
-                else: 
-                    results = 2
-            else: 
-                results = -1
-        #매수
-        elif k < min:
-            if k > d:
-                if iscross:
-                    results = 2
-                else:
-                    results = 1
-            else: 
-                results = -1
+        if k > d:
+            if iscross:
+                results = 2
+            else:
+                results = 1
+        else: 
+            results = -1
+                
+        # if k > max:
+        #     if k > d:
+        #         if iscross:
+        #             results = 2
+        #         else: 
+        #             results = 2
+        #     else: 
+        #         results = -1
+        # #매수
+        # elif k < min:
+        #     if k > d:
+        #         if iscross:
+        #             results = 2
+        #         else:
+        #             results = 1
+        #     else: 
+        #         results = -1
+        
+        # if abs(k - d) < 2:
+        #     print(abs(k - d))
+        #     results = 0
 
         return results
 
     def CalculateStochasticSlow(self, nF, nM1, nM2, data, index, counts):
-        lastindex = len(data)
-        dfdata = data.iloc[:lastindex-counts]
-        maxV = dfdata.high.rolling(nF).max()        
-        minV = dfdata.low.rolling(nF).min()
-        maxV.fillna(0)
-        minV.fillna(0)
+        max = data.high.rolling(nF).max()        
+        min = data.low.rolling(nF).min()
+        fast_k = ((data.close - min) / (max - min)) * 100
+        slow_k = fast_k.rolling(nM1).mean()
+        slow_d = slow_k.rolling(nM2).mean()
         reDf = pd.DataFrame()
-        reDf['fastK'] = (dfdata.close - minV) / (maxV - minV)
-        reDf['slowK'] = reDf['fastK'].rolling(nM1).mean()
-        reDf['slowD'] = reDf['slowK'].rolling(nM2).mean()
-        return reDf[index].iloc[-1]
+        reDf['fastK'] = fast_k.iloc[-1]
+        reDf['slowK'] = slow_k
+        reDf['slowD'] = slow_d
+        return reDf[index].iloc[counts]
+        # lastindex = len(data)
+        # dfdata = data.iloc[0:lastindex-counts]
+        # maxV = dfdata.high.rolling(nF).max()        
+        # minV = dfdata.low.rolling(nF).min()
+        # maxV.fillna(0)
+        # minV.fillna(0)
+        # reDf = pd.DataFrame()
+        # reDf['fastK'] = (dfdata.close - minV) / (maxV - minV)
+        # reDf['slowK'] = reDf['fastK'].rolling(nM1).mean()
+        # reDf['slowD'] = reDf['slowK'].rolling(nM2).mean()
+        # print(counts)
+        # print(reDf[index].iloc[-1])
+        # return reDf[index].iloc[-1]
 
 
     # def get_avg_buy_price(self, ticker='KRW', contain_req=False):
@@ -340,25 +364,36 @@ class Stock:
         else:
             df20 = self.refDF
             lastindex = len(df20)
-            ema7_2minus = df20.iloc[lastindex-9:lastindex-2]['close'].ewm(7).mean().iloc[-1]
-            ema7_1minus = df20.iloc[lastindex-8:lastindex-1]['close'].ewm(7).mean().iloc[-1]
-            ema7 = df20.iloc[lastindex-7:lastindex]['close'].ewm(7).mean().iloc[-1]
-            ema15_2minus = df20.iloc[lastindex-17:lastindex-2]['close'].ewm(15).mean().iloc[-1]
-            ema15_1minus = df20.iloc[lastindex-16:lastindex-1]['close'].ewm(15).mean().iloc[-1]
-            ema15 = df20.iloc[lastindex-15:lastindex]['close'].ewm(15).mean().iloc[-1]    
+
+            values = 0
+            now = -1 + values
+            prev1 = -2 + values
+            prev2 = -3 + values
+            v = lastindex+(-7+prev2)
+            v1 = lastindex+(prev2)
+            ema7_2minus = df20.iloc[lastindex+(-7+prev2):lastindex+(prev2)]['close'].ewm(7).mean().iloc[-1]
+            ema7_1minus = df20.iloc[lastindex+(-7+prev1):lastindex+(prev1)]['close'].ewm(7).mean().iloc[-1]
+            ema7 = df20.iloc[lastindex+(-7+now):lastindex+now]['close'].ewm(7).mean().iloc[-1]
+            ema15_2minus = df20.iloc[lastindex+(-15+prev2):lastindex+(prev2)]['close'].ewm(15).mean().iloc[-1]
+            ema15_1minus = df20.iloc[lastindex+(-15+prev1):lastindex+(prev1)]['close'].ewm(15).mean().iloc[-1]
+            ema15 = df20.iloc[lastindex+(-15+now):lastindex+now]['close'].ewm(15).mean().iloc[-1]    
 
             iscross = self.IsCross(ema7, ema7_1minus,ema7_2minus, ema15, ema15_1minus,ema15_2minus)
 
+            result = 0
             if ema7 > ema15:
                 if iscross:
-                   return 2
+                   result =  2
                 else:
-                    return 1
+                    result = 1
+
+                v = ema7 - ema15 
 
             elif ema7 < ema15:
-                return -1
+                result = -1
+                v = ema15 -  ema7
 
-            return 0
+            return result
 
     # ema 7수치
     def Get_onlcy_EMA(self):

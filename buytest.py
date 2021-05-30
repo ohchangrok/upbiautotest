@@ -36,24 +36,26 @@ upbit.buy_market_order("KRW-ETC", 5000)
 #     ema15 = df15['close'].ewm(15).mean()#.iloc[-1]
 #     return ema15
 
-def Get_onlcy_ema(ticker, inter):
-    df20 = pyupbit.get_ohlcv(ticker, interval=inter, count= 20)
-    lastindex = len(df20)
-    ema7_1minus = df20.iloc[lastindex-8:lastindex-1]['close'].mean()
-    ema7 = df20.iloc[lastindex-7:lastindex]['close'].mean()
-    ema15_1minus = df20.iloc[lastindex-15:lastindex]['close'].mean()
-    ema15 = df20.iloc[lastindex-15:lastindex]['close'].mean()       
+# def Get_onlcy_ema(ticker, inter):
+#     df20 = pyupbit.get_ohlcv(ticker, interval=inter, count= 20)
+#     lastindex = len(df20)
+#     ema7_1minus = df20.iloc[lastindex-8:lastindex-1]['close'].mean()
+#     ema7 = df20.iloc[lastindex-7:lastindex]['close'].mean()
+#     ema15_1minus = df20.iloc[lastindex-15:lastindex]['close'].mean()
+#     ema15 = df20.iloc[lastindex-15:lastindex]['close'].mean()       
 
-    if ema7 > ema15 and ema7_1minus > ema15_1minus: #2틱상승
-        return 2
-        print("")
-    elif ema7 > ema15 and ema7_1minus < ema15_1minus: #1틱상승
-        return 1
-    elif ema7 < ema15 and ema7_1minus > ema15_1minus: #1틱하락
-        return -1
-    else: #2틱하락
-        return -2
+#     if ema7 > ema15 and ema7_1minus > ema15_1minus: #2틱상승
+#         return 2
+#         print("")
+#     elif ema7 > ema15 and ema7_1minus < ema15_1minus: #1틱상승
+#         return 1
+#     elif ema7 < ema15 and ema7_1minus > ema15_1minus: #1틱하락
+#         return -1
+#     else: #2틱하락
+#         return -2
         
 
-v = Get_onlcy_ema("KRW-ETC",'minute1')
-print(v)
+# v = Get_onlcy_ema("KRW-ETC",'minute1')
+# print(v)
+
+print(20+(-7+(-2)))

@@ -12,8 +12,8 @@ def Get_MA(counts):
     print(ma)
     return ma15
 
-def get_ror(k=0.02):
-    df = pyupbit.get_ohlcv("KRW-LTC", count=2)
+def get_ror(k=0.5):
+    df = pyupbit.get_ohlcv("KRW-LTC", count=30)
     df['range'] = (df['high'] - df['low']) * k
     df['target'] = df['open'] + df['range'].shift(1)
 
