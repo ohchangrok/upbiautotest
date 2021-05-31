@@ -12,9 +12,19 @@ from numpy import fabs
 upbit_minprice = 5000
 #타겟금액을 구할시에 계산할 이전날짜의 갯수
 
-access = "GKzRKyi1gfcC2mtXyHxY345JxgHHQR27yZ5xBMq3"          # 본인 값으로 변경
-secret = "GuRqKjGBshZObqPvrX0G27hG9pXUV2vh3UBgNztk"          # 본인 값으로 변경
-
+class Key:
+    access = ""
+    secret = ""
+    def LoadKeyData(self):
+        path = "./key.csv"
+        if os.path.exists(path):
+            data = pd.read_csv(r"key.csv",index_col='access')
+            selectdata = data.to_dict()
+            for key, value in selectdata.items():
+                self.access = key
+                self.secret = value['secret']
+        else:
+            print("Not keyfile")
 # Class
 class TableManager:
     path = "./table.csv"
@@ -468,9 +478,11 @@ class Stock:
             return 0
 
 
-        
-# Start
-upbit = pyupbit.Upbit(access, secret)
+k = Key()
+k.LoadKeyData()
+print(k.access)
+print(k.secret)
+upbit = pyupbit.Upbit(k.access , k.secret)
 
 stocklist = list()
 tablemanager = TableManager()
