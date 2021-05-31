@@ -232,6 +232,7 @@ class Stock:
         prev1 = -2
         prev2 = -3
         
+        #스토캐스틱 매인코드 뒤에 후처리는 알아서
         k    = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', now + values) *100
         k_m1 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', prev1 + values) *100
         k_m2 = self.CalculateStochasticSlow(10, 3, 3, self.refDF, 'slowK', prev2 + values) *100
@@ -374,12 +375,15 @@ class Stock:
             df20 = self.refDF
             lastindex = len(df20)
 
+            
             values = 0
             now = -1 + values
             prev1 = -2 + values
             prev2 = -3 + values
             v = lastindex+(-7+prev2)
             v1 = lastindex+(prev2)
+
+            #EMA 매인코드 뒤에 후처리는 알아서
             ema7_2minus = df20.iloc[lastindex+(-7+prev2):lastindex+(prev2)]['close'].ewm(7).mean().iloc[-1]
             ema7_1minus = df20.iloc[lastindex+(-7+prev1):lastindex+(prev1)]['close'].ewm(7).mean().iloc[-1]
             ema7 = df20.iloc[lastindex+(-7+now):lastindex+now]['close'].ewm(7).mean().iloc[-1]
