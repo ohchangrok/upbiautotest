@@ -176,7 +176,9 @@ class Stock:
         buy = buycount - amount
         if krw <= 0:
             return
-        
+        if buy < 2:
+            return
+            
         if buy > 0:
             if buy > krw:
                 upbit.buy_market_order(self.ticker, krw)
