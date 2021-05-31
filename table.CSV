@@ -1,0 +1,7 @@
+ticker,ETH,BTC
+buy_price,500000,500000
+sell_percent,2,2
+value_k,10,10
+target_day,2,2
+ma_Type,day,day
+bench_Mark,None,None
