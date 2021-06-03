@@ -1,4 +1,4 @@
-import talib.abstract as ta
+#import talib.abstract as ta
 from numpy.core.numeric import isclose
 from pandas.core.frame import DataFrame
 import pyupbit
@@ -176,60 +176,60 @@ class Stock:
     # ema가 현제 크로스인지 체크
     def Get_EMAorMA(self, _isEMA = False):
         
-        if self.benchtype == "None":
-            return 0
-        else:
+        # if self.benchtype == "None":
+        #     return 0
+        # else:
             
-            #ema or ma구하는코드 업비트기준으로 하려면 ma
-            #데이터구하는 메인코드
-            df_close = self.refDF['close']
-            self.refDF['7ma'] = ta.MA(df_close, 7)
-            self.refDF['15ma'] = ta.MA(df_close, 15)
-            self.refDF['7ema'] = ta.EMA(df_close, 7)
-            self.refDF['15ema'] = ta.EMA(df_close, 15)
-            #여기까지
+        #     #ema or ma구하는코드 업비트기준으로 하려면 ma
+        #     #데이터구하는 메인코드
+        #     df_close = self.refDF['close']
+        #     self.refDF['7ma'] = ta.MA(df_close, 7)
+        #     self.refDF['15ma'] = ta.MA(df_close, 15)
+        #     self.refDF['7ema'] = ta.EMA(df_close, 7)
+        #     self.refDF['15ema'] = ta.EMA(df_close, 15)
+        #     #여기까지
 
-            #NaN삭제(Nan은 null)
-            stocklist = list()
-            for i in range(len(self.refDF)):
-                if self.refDF.iloc[i].isnull().any():
-                    continue
-                else:
-                    stocklist.append(self.refDF.iloc[i])
-            dfs = pd.DataFrame(stocklist) #list->dataframe
-            results = 0
-            count = len(dfs)
-            prev_7 = 0
-            prev_15 = 0
-            now_7 = 0
-            now_15 = 0
-            if _isEMA == True:
-                prev_7 = dfs['7ema'].iloc[count-2]
-                prev_15 = dfs['15ema'].iloc[count-2]
-                now_7 = dfs['7ema'].iloc[-1]
-                now_15 = dfs['15ema'].iloc[-1]
-            else:
-                prev_7 = dfs['7ma'].iloc[count-2]
-                prev_15 = dfs['15ma'].iloc[count-2]
-                now_7 = dfs['7ma'].iloc[-1]
-                now_15 = dfs['15ma'].iloc[-1]
+        #     #NaN삭제(Nan은 null)
+        #     stocklist = list()
+        #     for i in range(len(self.refDF)):
+        #         if self.refDF.iloc[i].isnull().any():
+        #             continue
+        #         else:
+        #             stocklist.append(self.refDF.iloc[i])
+        #     dfs = pd.DataFrame(stocklist) #list->dataframe
+        #     results = 0
+        #     count = len(dfs)
+        #     prev_7 = 0
+        #     prev_15 = 0
+        #     now_7 = 0
+        #     now_15 = 0
+        #     if _isEMA == True:
+        #         prev_7 = dfs['7ema'].iloc[count-2]
+        #         prev_15 = dfs['15ema'].iloc[count-2]
+        #         now_7 = dfs['7ema'].iloc[-1]
+        #         now_15 = dfs['15ema'].iloc[-1]
+        #     else:
+        #         prev_7 = dfs['7ma'].iloc[count-2]
+        #         prev_15 = dfs['15ma'].iloc[count-2]
+        #         now_7 = dfs['7ma'].iloc[-1]
+        #         now_15 = dfs['15ma'].iloc[-1]
 
-            #교체했는지 체크하는코드
-            is_prev_cross = False
-            is_now_cross = False
-            if prev_7 > prev_15:
-                is_prev_cross = True
-            if now_7 > now_15:
-                is_now_cross = True
+        #     #교체했는지 체크하는코드
+        #     is_prev_cross = False
+        #     is_now_cross = False
+        #     if prev_7 > prev_15:
+        #         is_prev_cross = True
+        #     if now_7 > now_15:
+        #         is_now_cross = True
 
-            isCross = False
-            if is_prev_cross != is_now_cross:
-                isCross = True
-            if isCross == True:
-                if now_7 > now_15:
-                    return 1
-                elif now_7 < now_15:
-                    return -1
+        #     isCross = False
+        #     if is_prev_cross != is_now_cross:
+        #         isCross = True
+        #     if isCross == True:
+        #         if now_7 > now_15:
+        #             return 1
+        #         elif now_7 < now_15:
+        #             return -1
 
             return 0
     
@@ -238,44 +238,45 @@ class Stock:
     #25퍼에서 크로스되어 올라오면은 구입하고 75퍼 이상에서 크로스되어 내려가면은 판매
     def Is_StochasticSlow(self):
         #data Operation
-        self.refDF['k'], self.refDF['d'] = ta.STOCH(self.refDF['high'], self.refDF['low'],self.refDF['close'],10 ,3 ,0 ,3 ,0)
-        stocklist = list()
-        for i in range(len(self.refDF)): #널값은 삭제
-            if self.refDF.iloc[i].isnull().any():
-                continue
-            else:
-                stocklist.append(self.refDF.iloc[i])
-        ssDf = pd.DataFrame(stocklist)
+        # self.refDF['k'], self.refDF['d'] = ta.STOCH(self.refDF['high'], self.refDF['low'],self.refDF['close'],10 ,3 ,0 ,3 ,0)
+        # stocklist = list()
+        # for i in range(len(self.refDF)): #널값은 삭제
+        #     if self.refDF.iloc[i].isnull().any():
+        #         continue
+        #     else:
+        #         stocklist.append(self.refDF.iloc[i])
+        # ssDf = pd.DataFrame(stocklist)
         
-        #Ckeck logic
-        ssDfcount = len(ssDf) -1
-        ssCrossCount = 0
-        min = 25
-        max = 75
-        ssCheckCount = 3
-        isCheckMax = False #75퍼이상인가체크
-        for i in range(len(ssDf)):
-            k = ssDf['k'].iloc[ssDfcount - i]
-            d = ssDf['d'].iloc[ssDfcount - i]
-            if k > max and d > max: #75퍼상향일때의 크로스갯수
-                if k < d:
-                   ssCrossCount += 1
-                isCheckMax = True 
-            elif k < min and d < min: #25퍼하향일때의 크로스갯수
-                if k > d:
-                    ssCrossCount += 1
+        # #Ckeck logic
+        # ssDfcount = len(ssDf) -1
+        # ssCrossCount = 0
+        # min = 25
+        # max = 75
+        # ssCheckCount = 3
+        # isCheckMax = False #75퍼이상인가체크
+        # for i in range(len(ssDf)):
+        #     k = ssDf['k'].iloc[ssDfcount - i]
+        #     d = ssDf['d'].iloc[ssDfcount - i]
+        #     if k > max and d > max: #75퍼상향일때의 크로스갯수
+        #         if k < d:
+        #            ssCrossCount += 1
+        #         isCheckMax = True 
+        #     elif k < min and d < min: #25퍼하향일때의 크로스갯수
+        #         if k > d:
+        #             ssCrossCount += 1
 
-        k = ssDf['k'].iloc[ssDfcount]
-        d = ssDf['d'].iloc[ssDfcount]
-        results = 0
-        if ssCrossCount > 1: #1회라도 크로스된적이 있는가
-            if isCheckMax: #75%위
-                if k < d: #떨어지기 대기중
-                    results = -1
-            else:
-                if k > d:
-                    results = 1
-        return results
+        # k = ssDf['k'].iloc[ssDfcount]
+        # d = ssDf['d'].iloc[ssDfcount]
+        # results = 0
+        # if ssCrossCount > 1: #1회라도 크로스된적이 있는가
+        #     if isCheckMax: #75%위
+        #         if k < d: #떨어지기 대기중
+        #             results = -1
+        #     else:
+        #         if k > d:
+        #             results = 1
+        # return results
+        return 0
     
     #초기화
     def init(self, _ticker, _buyprice, _sellpercent, _value_k, _targetday, _matype, _benchtype, _checkTick ):
